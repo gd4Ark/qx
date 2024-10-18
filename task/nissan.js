@@ -69,8 +69,7 @@ async function main() {
   await sort_like();//点赞
   await sort_unlike();// 取消点赞
 
-  var result = await comments();//评论帖子
-  if (result == '1') {await comments_del();}//删除评论
+  await comments();//评论帖子
 
   let _msg;
   if ($.isQuanX()) {
@@ -111,6 +110,7 @@ async function new_list() {
   url = `/mb-gw/dndc-gateway/community/api/v2/feeds/new_list`;
   let {result, msg, rows} = await httpPost(url);
   let find_id = rows?.rows?.find(item => item.style_type === 'Postings_style');
+  $.push_ids = rows?.rows?.filter(item => item.style_type === 'Postings_style').map(find=> find.id);
   $.push_id = find_id ? find_id?.id : null;//帖子id
   $.tittle = find_id?.feed_title;//帖子标题
   $.user_id = find_id?.user_id//楼主user_id
@@ -149,17 +149,33 @@ async function sort_unlike() {
 
 //评论
 async function comments() {
-  const text = ['我非常赞同您的观点', '您的帖子让我看到了全新的角度', '谢谢您的分享，感谢', '您的帖子让我受益匪浅', '再次感谢您的分享！', '非常赞同您的观点', '感谢您为我打开了一扇新门', '你的帖子给我带来了很大的启发', '谢谢您的分享和付出！', '这帖子很有帮助'
-  ];
-  const 评论 = text[Math.floor(Math.random() * text.length)]
-  url = `/mb-gw/dndc-gateway/community/api/v2/comments`;
-  body = `{"body":"${评论}","commentable_id":${$.push_id},"commentable_type":"feeds","use_volc":false}`;
-  let {result, msg, rows} = await httpPost(url, body);
-  $.comment_id = rows?.comment?.id;
-  let _msg;
-  _msg = `评论帖子：${msg}`;
-  pushMsg(_msg);
-  return result
+  const text = [
+    '我非常赞同您的观点',
+    '您的帖子让我看到了全新的角度',
+    '谢谢您的分享，感谢',
+    '您的帖子让我受益匪浅',
+    '再次感谢您的分享！',
+    '非常赞同您的观点',
+    '感谢您为我打开了一扇新门',
+    '你的帖子给我带来了很大的启发',
+    '谢谢您的分享和付出！',
+    '这帖子很有帮助'
+  ]
+
+  for (const push_id of $.push_ids) {
+    const 评论 = text[Math.floor(Math.random() * text.length)]
+    url = `/mb-gw/dndc-gateway/community/api/v2/comments`
+    body = `{"body":"${评论}","commentable_id":${push_id},"commentable_type":"feeds","use_volc":false}`
+    let { result, msg, rows } = await httpPost(url, body)
+    $.comment_id = rows?.comment?.id
+    let _msg
+    _msg = `评论帖子：${msg}`
+    pushMsg(_msg)
+
+    if (result == '1') {
+      await comments_del()
+    } //删除评论
+  }
 }
 
 //删除评论
