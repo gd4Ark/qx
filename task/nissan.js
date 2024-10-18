@@ -40,7 +40,6 @@ async function getCk() {
     if (token) {
       const ckVal = $.toStr({token, uuid});
       $.setdata(ckVal, _key);
-      $.msg($.name, '获取ck成功🎉', ckVal);
     } else {
       $.msg($.name, '', '❌获取ck失败');
     }
