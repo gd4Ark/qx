@@ -109,7 +109,7 @@ async function new_list() {
   url = `/mb-gw/dndc-gateway/community/api/v2/feeds/new_list`;
   let {result, msg, rows} = await httpPost(url);
   let find_id = rows?.rows?.find(item => item.style_type === 'Postings_style');
-  $.push_ids = rows?.rows?.filter(item => item.style_type === 'Postings_style').map(find=> find.id);
+  $.push_ids = rows?.rows?.filter(item => item.style_type === 'Postings_style').map(find=> find.id).slice(0,1);
   $.push_id = find_id ? find_id?.id : null;//帖子id
   $.tittle = find_id?.feed_title;//帖子标题
   $.user_id = find_id?.user_id//楼主user_id
